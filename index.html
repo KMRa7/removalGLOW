@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>連絡先入力</title>
+
+  <style>
+    :root {
+      --bg: #f2f2f2;
+      --bar: #3b3b3b;
+      --line: #e6e6e6;
+      --text: #222;
+      --muted: #777;
+      --card: #fff;
+      --input: #fff;
+      --radius: 6px;
+
+      --green: #67b52f;
+      --greenSoft: #eaf6df;
+      --dark: #222;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+    }
+
+    .topbar {
+      height: 56px;
+      background: var(--bar);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 14px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .hamburger {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .hamburger .lines {
+      width: 22px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .hamburger .lines span {
+      display: block;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .titlebar {
+      background: #efefef;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 14px;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .sheet {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      align-items: flex-start;
+    }
+
+    .row:first-child {
+      border-top: 0;
+    }
+
+    .label {
+      width: 140px;
+      min-width: 140px;
+      font-weight: 700;
+      padding-top: 10px;
+      line-height: 1.2;
+    }
+
+    .label .req {
+      margin-left: 4px;
+      font-weight: 800;
+    }
+
+    .control {
+      flex: 1;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #d6d6d6;
+      border-radius: var(--radius);
+      padding: 0 12px;
+      background: var(--input);
+      font-size: 16px;
+      outline: none;
+    }
+
+    input,
+    select {
+      height: 42px;
+    }
+
+    textarea {
+      padding: 10px 12px;
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #9bbcff;
+      box-shadow: 0 0 0 3px rgba(11, 99, 255, .12);
+    }
+
+    /* ===== 規約/注意事項（画像風） ===== */
+    .agreeBlock {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    .agreeLine {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: #222;
+      user-select: none;
+    }
+
+    .agreeLine input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--green);
+    }
+
+    .agreeLine small {
+      display: block;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: 28px;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .pillGreen {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 2px solid var(--green);
+      background: #fff;
+      color: var(--green);
+      font-weight: 800;
+      cursor: pointer;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .pillGreen:hover {
+      background: var(--greenSoft);
+    }
+
+    .actionsRow {
+      padding: 18px 14px 22px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .twoBtns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .pillBack,
+    .pillConfirm {
+      flex: 1;
+      height: 52px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .pillBack {
+      border: 2px solid #666;
+      background: #fff;
+      color: #111;
+    }
+
+    .pillConfirm {
+      border: 2px solid var(--green);
+      background: #fff;
+      color: var(--green);
+    }
+
+    .pillConfirm:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    /* ===== modal ===== */
+    .modalOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 100;
+    }
+
+    .modal {
+      width: min(680px, 100%);
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modalHeader {
+      padding: 14px 16px;
+      font-weight: 900;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modalClose {
+      border: 0;
+      background: #f2f2f2;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .modalBody {
+      padding: 14px 16px;
+      overflow: auto;
+      line-height: 1.75;
+      font-size: 14px;
+      color: #222;
+    }
+
+    .legalText {
+      white-space: pre-wrap;
+      /* 改行保持 */
+      word-break: break-word;
+      /* 長文折返し */
+    }
+
+    .modalFooter {
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      gap: 10px;
+    }
+
+    .agreeBtn {
+      flex: 1;
+      height: 46px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--green);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .agreeBtn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    /* confirm view */
+    .confirm {
+      display: none;
+      padding: 14px;
+    }
+
+    .confirm h2 {
+      margin: 8px 0 12px;
+      font-size: 18px;
+    }
+
+    .summary {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .sumRow {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .sumRow:first-child {
+      border-top: 0;
+    }
+
+    .sumKey {
+      width: 160px;
+      min-width: 160px;
+      color: #111;
+      font-weight: 800;
+    }
+
+    .sumVal {
+      flex: 1;
+      color: #222;
+      word-break: break-word;
+    }
+
+    .confirmActions {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .ghost {
+      flex: 1;
+      height: 52px;
+      border-radius: 999px;
+      border: 2px solid #666;
+      background: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      color: #111;
+    }
+
+    .send {
+      flex: 1;
+      height: 52px;
+      border-radius: 999px;
+      border: 0;
+      background: var(--dark);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    @media (max-width:520px) {
+      .label {
+        width: 120px;
+        min-width: 120px;
+      }
+
+      .sumKey {
+        width: 120px;
+        min-width: 120px;
+      }
+    }
+
+    /* ===== スマホ最適化（追記） ===== */
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .sheet {
+      max-width: 640px;
+      /* スマホ中心 */
+      width: 100%;
+    }
+
+    .row {
+      /* 2カラムをスマホでもきれいに揃える */
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label {
+      width: auto;
+      min-width: 0;
+      padding-top: 0;
+      font-size: 15px;
+    }
+
+    input,
+    select {
+      height: 46px;
+      /* 指で押しやすく */
+      font-size: 16px;
+      /* iOSズーム防止 */
+    }
+
+    textarea {
+      font-size: 16px;
+    }
+
+    /* 規約ボタンはスマホでは幅いっぱいが押しやすい */
+    .pillGreen {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* 下の「戻る / 確認」をスマホで固定（画像っぽく） */
+    .actionsRow {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      padding-bottom: calc(22px + env(safe-area-inset-bottom));
+      z-index: 5;
+    }
+
+    /* チェック周りのタップしやすさ */
+    .agreeLine {
+      padding: 6px 0;
+    }
+
+    .agreeLine input {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* さらに狭い端末は1カラム（ラベル→入力） */
+    @media (max-width: 380px) {
+      .row {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .label {
+        padding-top: 0;
+      }
+    }
+
+    /* モーダルもスマホで見やすく */
+    @media (max-width: 600px) {
+      .modal {
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 16px;
+      }
+
+      .modalBody {
+        font-size: 14px;
+      }
+
+      .agreeBtn {
+        height: 50px;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <button class="hamburger" type="button" aria-label="menu">
+      <div class="lines" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </button>
+  </header>
+
+  <div class="titlebar">連絡先入力</div>
+
+  <!-- 入力画面 -->
+  <main class="sheet" id="inputView">
+    <form id="contactForm" novalidate>
+      <div class="row">
+        <div class="label">姓<span class="req">*</span></div>
+        <div class="control"><input id="lastName" type="text" autocomplete="family-name" required /></div>
+      </div>
+
+      <div class="row">
+        <div class="label">名<span class="req">*</span></div>
+        <div class="control"><input id="firstName" type="text" autocomplete="given-name" required /></div>
+      </div>
+
+      <div class="row">
+        <div class="label">フリガナ（姓）<span class="req">*</span></div>
+        <div class="control"><input id="lastKana" type="text" inputmode="kana" placeholder="例：ヤマダ" required /></div>
+      </div>
+
+      <div class="row">
+        <div class="label">フリガナ（名）<span class="req">*</span></div>
+        <div class="control"><input id="firstKana" type="text" inputmode="kana" placeholder="例：タロウ" required /></div>
+      </div>
+
+      <div class="row">
+        <div class="label">E-mail<span class="req">*</span></div>
+        <div class="control"><input id="email" type="email" autocomplete="email" placeholder="example@email.com"
+            required /></div>
+      </div>
+
+      <div class="row">
+        <div class="label">TEL<span class="req">*</span></div>
+        <div class="control">
+          <p class="hint">ハイフンなし</p>
+          <input id="tel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="09012345678" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">性別</div>
+        <div class="control">
+          <select id="gender">
+            <option value="">—</option>
+            <option>男性</option>
+            <option>女性</option>
+            <option>回答しない</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">誕生日</div>
+        <div class="control"><input id="birthday" type="text" inputmode="numeric"
+            placeholder="YYYY/MM/DD（例：2025/12/09）" /></div>
+      </div>
+
+      <div class="row">
+        <div class="label">あらゆるワクチン接種について<span class="req">*</span></div>
+        <div class="control">
+          <select id="vaccine" required>
+            <option value="">—</option>
+            <option>接種済み</option>
+            <option>未接種</option>
+            <option>該当なし</option>
+            <option>不明</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">その他ご要望など</div>
+        <div class="control"><textarea id="memo"></textarea></div>
+      </div>
+
+      <!-- ご利用規約 -->
+      <div class="row">
+        <div class="label">ご利用規約</div>
+        <div class="control">
+          <div class="agreeBlock">
+            <label class="agreeLine">
+              <input id="agreeTerms" type="checkbox" disabled />
+              <span>利用規約に同意する</span>
+            </label>
+            <button class="pillGreen" type="button" id="openTerms">利用規約を確認する</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 注意事項 -->
+      <div class="row">
+        <div class="label">注意事項</div>
+        <div class="control">
+          <div class="agreeBlock">
+            <label class="agreeLine">
+              <input id="agreeNotes" type="checkbox" disabled />
+              <span>注意事項を確認</span>
+            </label>
+            <small class="hint">※ポップアップ内を下までスクロールすると「同意する」が押せます。</small>
+            <button class="pillGreen" type="button" id="openNotes">注意事項（必ずお読みください）</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actionsRow">
+        <div class="twoBtns">
+          <button class="pillBack" type="button" id="backFromInput">戻る</button>
+          <button class="pillConfirm" type="button" id="toConfirm" disabled>確認</button>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- 確認画面 -->
+  <main class="sheet confirm" id="confirmView" aria-live="polite">
+    <div style="padding:14px;">
+      <h2>入力内容の確認</h2>
+      <div class="summary" id="summary"></div>
+
+      <div class="confirmActions">
+        <button class="ghost" type="button" id="backBtn">戻る</button>
+        <button class="send" type="button" id="sendBtn">送信</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 利用規約モーダル -->
+  <div class="modalOverlay" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <div id="termsTitle">ご利用規約</div>
+        <button class="modalClose" type="button" data-close="termsModal">閉じる</button>
+      </div>
+      <div class="modalBody" id="termsBody">
+        <div class="legalText">
+          ご利用規約
+          ＜Web予約申込利用規約＞
+          第１条 目的
+          Depserve予約申込
+          利用規約(以下､｢本規約｣といいます)は､次条に定める利用者が､株式会社コンフォートジャパンおよびその代理人(以下､総称して｢当社｣といいます)の運営する｢予約申込｣(以下､｢本サイト｣といいます)を利用する際の一切について適用します｡
+
+          第２条 定義
+          １． GLOWとは､当社が経営する脱毛サロンをいいます｡
+          ２． ｢予約申込｣とは､サロンを初めて利用するお客様を対象とした､予約希望者がインターネットでサロンの予約を申し込むことが出来る当社のサービスです｡
+          ３． 本サイトの利用とは､サロンの予約希望者が本サイトに接続しサロンの予約を申し込む事をいいます｡
+          ４． 利用者とは､本サイトを利用する者をいい､第3条第2項の制限に該当しない者をいいます｡
+
+          第３条 本サイト利用上の注意事項
+          １． 利用者は､本サイトを利用した時点で本規約及び当社個人情報保護方針に同意したものとみなします｡
+          ２． 以下の各号に該当する方は､本サイトを利用できません。
+          ① 本サイトで予約を受付けているサロンに来店ができない方(海外を含む)
+          ② 治療中等､医師等にエステティックを制限されている方
+          ③ 未成年者の方（当社が特定した一部のコース申込の場合は除く）
+          ④ 予約手続きに必要な電子メールを受信できない方
+          ３． 本サイトの利用方法等については､本サイト内｢Web予約について｣に従うものとします｡
+          ４． 当社は､利用者による本サイトでのサロンの予約申込み手続き完了後にその旨を記載した電子メール（以下､「予約完了メール」といいます）を利用者の指定したメールアドレスに送信した時点で､予約が完了するものとします。
+          尚､お申込内容に確認事項が有る場合､当社より直接利用者に電話連絡をする場合があります。
+          ５． 利用者が本サイト利用中に申込みの操作を途中で中止した場合又は一定時間内に所定の手続きを行わなかった場合､申込みは無効とします｡
+          ６． 予約完了後の予約変更・取り消しは､予約完了メールに記載された予約変更フォームより所定の変更・取消手続きを行うものとします。
+          ７． 予約状況により利用者が希望した日時およびサロンを案内できない場合､電話にて希望に近い日時または別サロンを提案する場合があります｡
+          ８．
+          利用者が本規約に違反している或いはその他本サイトの利用者として不適切と当社が判断した場合､当社は直ちに当該利用者に何ら通知することなく利用者の本サイト利用を停止させることが出来るものとし､この場合､当社は一切の損害賠償の義務を負わないものとします｡
+          ９． 本サイトへの接続及び当社からのメール受信時に発生する通信料等は､利用者の負担となります｡
+          １０． 本サイトは､原則として事前にお知らせした上で内容を変更・中止する場合があります｡但し､緊急の場合は､この限りではありません｡
+
+          第４条 禁止事項
+          利用者は本サイトにおいて以下の各号の行為を行ってはならないものとします｡
+          ① 虚偽の情報または他人の情報で登録する行為
+          ② 有害なコンピュータプログラム等を送信等する行為
+          ③ 他の利用者､第三者､又は本サイト用の設備に過大な負荷を生じさせる行為､他の利用者､第三者､その他本サイトの使用又は運営に支障を与える行為
+          ④ ID等（他者のID等を含む）を不正に売買したり､使用したり､させたりする行為
+          ⑤ 当社の業務を阻害する行為または不利益を与える行為､およびそのおそれがある行為
+          ⑥ その他､本規約又は法令に違反する行為
+
+          第５条 自己責任
+          １． 利用者は､自己の判断と責任において本サイトを利用するものとします。また､以下の場合に利用者が被った損害について､当社は一切賠償責任を負いません。
+          ① 本サイトの利用に際して､ソフトウェア､ハードウェアに故障等が発生した場合
+          ② 利用者と第三者の間においてトラブル等が生じた場合
+          ③ 第三者による本サイトの妨害､情報の改変等により本サイトが中断もしくは遅延し､なんらかの欠陥が生じた場合
+          ④ 当社の故意又は重大な過失なく本サイトが提供する情報が誤送信されるか欠陥が生じた場合
+          ⑤ 利用者の入力間違い等によりメールが送信されなかった。第三者に送信された場合あるいは電話での連絡が取れなかった場合
+          ⑥ 利用者が本サイト利用にあたり､本規約に違反した場合
+          ２． 利用者が､本規約に違反し当社に損害を与えた場合､利用者は当社に対して直接､間接を問わずその損害賠償責任を負担するものとします｡
+          ３． 利用者が､本規約又は法令に違反し第三者に損害を与えた場合､利用者は自己の責任で解決するものとします｡
+
+          第６条 知的財産権
+          １． 本サイトのすべての肖像､マーク等一切の著作物における知的財産権､またはその使用権等の権利は当社またはその正当な権利者に帰属します｡
+          ２． 利用者は､本サイト上の一切の情報を当社の承諾なしに私的利用を超える目的で複製し､出版し､放送し､公衆配信する行為等をその方法の如何を問わず行ってはならず､および第三者に行わせてはならないものとします｡
+
+          第７条 個人情報の取扱い
+          １． 当社は､当社の定める｢個人情報保護方針｣に従い､利用者の個人情報を適切に管理します｡サーバーは第三者の事業者により提供・管理されます。
+          ２． 本サイトにおいて取得する個人情報については､｢Web予約申込における個人情報の取扱いについて｣に記載します｡
+
+          第８条 本サイトの安全対策
+          １． 当社は､本サイトの安定した提供および不正使用防止対策・閲覧状況の分析のためにアクセスログを取得します｡なお不正使用防止の目的で､アクセスログの解析を秘密保持契約を締結した第三者に委託する場合があります｡
+          ２． 本サイトにおけるインターネット上の通信は､SSLを使用し暗号通信を行います｡
+          ３． 本サイトは､セッション管理にCookieを使用します｡なお､使用するCookieには利用者の個人情報を使用しません｡
+
+          第９条 本規約の適用および変更
+          当社は､利用者の了承を得ることなく､本規約を変更することができるものとします｡この場合､変更後に本サイトを利用した時点で､利用者は変更後の利用規約に同意したものとします｡また､変更後の規約は､当社が別途定める場合を除き､オンライン上に表示した時点より効力を生じるものとします｡
+
+          第１０条（管轄裁判所等）
+          本規約に定めなき事項又は各条項に疑義が生じた場合は､利用者と当社の間で誠意をもって協議解決するものとします｡又､本サイトの利用に関する訴訟については､当社本店所在地の第一審管轄裁判所をもって専属的合意管轄裁判所とします｡
+
+          付則
+          本規約は2021年9月1日から適用されるものとします。
+
+
+          Web予約申込における個人情報の取扱いについて(法定公表事項)
+          本サイトでの個人情報の取扱いについて｢個人情報の保護に関する法律｣(以下｢法｣といいます｡)に基づき､以下の事項を｢公表｣します｡
+
+          １．個人情報の利用目的の公表に関する事項(法第18条1項)
+          インターネット上の手続きで直接取得する個人情報と利用目的
+          取得個人情報 利用目的
+          氏名､性別、生年月日、メールアドレス､電話番号(携帯番号含む)
+          ・個人認証
+          ・年齢確認
+          ・ご予約に関する連絡
+          ・メール配信（同意を得た場合のみ）
+          ・当社からの電話による商品
+          ・コースのご案内
+
+          ２．共同利用についての事項 （法第23条）
+          取得した個人情報は共同利用しません。
+
+          ３．個人情報の「第三者提供」について （法第23条）
+          個人情報を適切に管理し､あらかじめお客様の同意を得ることなく第三者に提供することはありません。
+          ただし､次の場合は除きます。
+
+          ● 法令に基づく場合。
+          ● 人の生命､身体又は財産の保護のために必要がある場合であって､本人の同意を得ることが困難であるとき｡
+          ● 公衆衛生の向上又は児童の健全な育成の推進のために特に必要がある場合であって､本人の同意を得ることが困難であるとき｡
+          ● 国の機関若しくは地方公共団体又はその委託を受けた者が法令の定める事務を遂行することに対して協力する必要がある場合であって､本人の同意を得ることにより当該事務の遂行に支障を及ぼすおそれがあるとき｡
+          ● 本サイトの運営を明らかに妨害していると判断される行為があり当該行為についての対処が必要な場合であって､本人の同意を得ることにより当該行為についての対処に支障を及ぼすおそれがあるとき｡
+
+          4．「開示等の求め」に応じる手続き等に関する事項 （法第32条）
+          取得した個人情報の開示（法第28条）､訂正（法第29条）及び利用停止（法第30条）（以下これらを総称して､「開示等」といいます。）を希望される場合､５．に記載の受付窓口へメールにてお申し出ください。
+          ＜お手続き方法について＞
+          ① 受付窓口へメールにてご連絡ください（ご本人様以外の代理人によるお申し出の場合､当該代理人の本人証明の他､代理人の資格を証明する書類又は実印を捺印した委任状等の書類が必要になります）。
+          ② お申し出内容に応じて請求用紙をご本人様宛に郵送致します。
+          ③ 請求用紙に所定の事項をご記入頂いた上で受付窓口にご郵送頂きます（送料はお客様負担となります）。尚､開示請求の場合､弊社からの返信送料として､必ず本人限定受取書留用の切手（624円）を同封して頂きます。
+          ④ ご郵送頂いた開示等の請求内容に応じて､法定の範囲内で対応させて頂きます。但し､請求用紙や必要書類に不備・不足等があった場合や開示請求返信用の切手に不足がある場合､又は法令の範囲を超える場合は対応が出来ません。
+
+          5．「苦情」・「メール配信停止」等の受付窓口に関する事項（法第27条）
+          当社の個人情報の取り扱いに関する苦情及びメールの配信停止等については､下記までお申し出下さい｡
+
+          個人情報の取り扱いに関する苦情の申出先
+
+          脱毛サロンGLOW
+          〒158-0083
+          東京都世田谷区奥沢7丁目19−11グランエクリュ自由ヶ丘3階
+
+          6．個人情報取扱事業者 （法第27条）
+          脱毛サロンGLOW
+          〒158-0083
+          東京都世田谷区奥沢7丁目19−11グランエクリュ自由ヶ丘3階
+        </div>
+      </div>
+      <div class="modalFooter">
+        <button class="agreeBtn" type="button" id="agreeTermsBtn" disabled>同意する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 注意事項モーダル -->
+  <div class="modalOverlay" id="notesModal" role="dialog" aria-modal="true" aria-labelledby="notesTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <div id="notesTitle">注意事項（必ずお読みください）</div>
+        <button class="modalClose" type="button" data-close="notesModal">閉じる</button>
+      </div>
+      <div class="modalBody" id="notesBody">
+        <div class="legalText">
+          注意事項(必ずお読みください)
+          ☆下までスクロールしてお読みください。☆
+
+          【大切なお客様へ】
+          〜キャンセルについて〜
+
+          ご予約をやむを得ずキャンセルされる場合や予約を変更される場合は以下の通りキャンセル料を頂戴致します。
+
+          『前日』… 前日の18時まで変更 • キャンセルOK【18時以降は当日キャンセル扱い】
+
+          『当日』… 日時変更 • キャンセルともに施術料の50%
+          【コースご契約中のお客様】
+          日時変更・キャンセルともに
+          コース1回分消化､または
+          コース1回分施術料の50%
+
+          『無断』…キャンセル料は施術料金100%
+
+          ご理解とご協力のほど何卒、宜しくお願い致します。
+
+          ※ あらゆるワクチン接種について ※
+          ワクチン接種前後２週間はお手入れができません。
+          ご予約日時を改めてご確認くださいませ。
+
+          ■以下のいずれかの項目に当てはまる場合はお手入れが出来ません。
+          ・日光過敏症
+          ・ケロイド体質
+          ・ヘルペス
+          ・生理中および出血中の方
+          ・施術前後の飲酒
+          ・脱毛部位にアトピーの病状発症がある場合
+
+          ■以下のいずれかの項目に当てはまる場合はかかりつけのお医者様にご相談後、
+          ご来店いただきますようお願い申し上げます。
+          ・2週間以内にお薬やサプリメントの服用をされた場合。
+          ・現在治療中や、医師により診断された持病のある方。
+
+          フォームへのお申込みの後、当店で確認，承認しご予約確定となります。
+          ・完全予約制となりますため、ご希望日時でご案内ができない場合がございます。その場合別日時にてご提案させていただきますので、予めご了承くださいませ。
+
+          皆様の綺麗になるお手伝いを是非GLOWにさせて頂きたいと思っております。 ご来店を心より楽しみにお待ち致しております。
+        </div>
+      </div>
+      <div class="modalFooter">
+        <button class="agreeBtn" type="button" id="agreeNotesBtn" disabled>同意する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIFF -->
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+
+  <script>
+    const LIFF_ID = "2005254357-zKma9BZk";
+
+    const el = (id) => document.getElementById(id);
+
+    const inputView = el("inputView");
+    const confirmView = el("confirmView");
+    const summaryEl = el("summary");
+
+    const lastName = el("lastName");
+    const firstName = el("firstName");
+    const lastKana = el("lastKana");
+    const firstKana = el("firstKana");
+    const email = el("email");
+    const tel = el("tel");
+    const gender = el("gender");
+    const birthday = el("birthday");
+    const vaccine = el("vaccine");
+    const memo = el("memo");
+
+    const agreeTerms = el("agreeTerms");
+    const agreeNotes = el("agreeNotes");
+
+    const toConfirm = el("toConfirm");
+    const backFromInput = el("backFromInput");
+
+    const termsModal = el("termsModal");
+    const notesModal = el("notesModal");
+
+    const openTerms = el("openTerms");
+    const openNotes = el("openNotes");
+
+    const termsBody = el("termsBody");
+    const notesBody = el("notesBody");
+
+    const agreeTermsBtn = el("agreeTermsBtn");
+    const agreeNotesBtn = el("agreeNotesBtn");
+
+    const backBtn = el("backBtn");
+    const sendBtn = el("sendBtn");
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try { await liff.init({ liffId: LIFF_ID }); }
+      catch (e) { console.warn("LIFF init failed (ブラウザ確認中はOK):", e); }
+      refreshConfirmButton();
+    });
+
+    // ===== モーダル共通：下までスクロールしたら同意ボタン有効 =====
+    function openModalWithScrollGate(modalEl, bodyEl, agreeBtnEl) {
+      modalEl.style.display = "flex";
+      agreeBtnEl.disabled = true;
+
+      // 開いたら先頭へ
+      bodyEl.scrollTop = 0;
+
+      const check = () => {
+        const nearBottom = bodyEl.scrollTop + bodyEl.clientHeight >= bodyEl.scrollHeight - 4;
+        if (nearBottom) agreeBtnEl.disabled = false;
+      };
+
+      // 1回チェック（短文だった時用）
+      check();
+
+      // スクロール監視（重複登録を避ける）
+      bodyEl._scrollGateHandler && bodyEl.removeEventListener("scroll", bodyEl._scrollGateHandler);
+      bodyEl._scrollGateHandler = check;
+      bodyEl.addEventListener("scroll", check, { passive: true });
+    }
+
+    openTerms.addEventListener("click", () => openModalWithScrollGate(termsModal, termsBody, agreeTermsBtn));
+    openNotes.addEventListener("click", () => openModalWithScrollGate(notesModal, notesBody, agreeNotesBtn));
+
+    document.querySelectorAll("[data-close]").forEach(btn => {
+      btn.addEventListener("click", () => el(btn.dataset.close).style.display = "none");
+    });
+
+    [termsModal, notesModal].forEach(modal => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+      });
+    });
+
+    // 同意する → チェックON
+    agreeTermsBtn.addEventListener("click", () => {
+      agreeTerms.checked = true;
+      termsModal.style.display = "none";
+      refreshConfirmButton();
+    });
+    agreeNotesBtn.addEventListener("click", () => {
+      agreeNotes.checked = true;
+      notesModal.style.display = "none";
+      refreshConfirmButton();
+    });
+
+    function refreshConfirmButton() {
+      toConfirm.disabled = !(agreeTerms.checked && agreeNotes.checked);
+    }
+
+    // 入力画面の「戻る」
+    backFromInput.addEventListener("click", () => {
+      try {
+        if (window.liff && liff.isInClient && liff.isInClient()) liff.closeWindow();
+        else history.back();
+      } catch (e) { history.back(); }
+    });
+
+    // validation
+    function normalizeTel(v) { return (v || "").replace(/[-ー\s]/g, ""); }
+
+    function getFormData() {
+      return {
+        lastName: lastName.value.trim(),
+        firstName: firstName.value.trim(),
+        lastKana: lastKana.value.trim(),
+        firstKana: firstKana.value.trim(),
+        email: email.value.trim(),
+        tel: normalizeTel(tel.value),
+        gender: gender.value || "—",
+        birthday: birthday.value.trim() || "—",
+        vaccine: vaccine.value,
+        memo: memo.value.trim() || "—",
+        agreeTerms: agreeTerms.checked,
+        agreeNotes: agreeNotes.checked,
+      };
+    }
+
+    function validate() {
+      const d = getFormData();
+
+      if (!d.lastName) { alert("姓を入力してください。"); lastName.focus(); return null; }
+      if (!d.firstName) { alert("名を入力してください。"); firstName.focus(); return null; }
+      if (!d.lastKana) { alert("フリガナ（姓）を入力してください。"); lastKana.focus(); return null; }
+      if (!d.firstKana) { alert("フリガナ（名）を入力してください。"); firstKana.focus(); return null; }
+
+      if (!d.email) { alert("E-mailを入力してください。"); email.focus(); return null; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) {
+        alert("E-mailの形式が正しくありません。"); email.focus(); return null;
+      }
+
+      if (!d.tel) { alert("TELを入力してください（ハイフンなし）。"); tel.focus(); return null; }
+      if (!/^\d{9,12}$/.test(d.tel)) {
+        alert("TELは数字のみ（9〜12桁目安）で入力してください。"); tel.focus(); return null;
+      }
+
+      if (!d.vaccine) { alert("あらゆるワクチン接種について選択してください。"); vaccine.focus(); return null; }
+
+      if (!d.agreeTerms) { alert("利用規約を確認し、同意してください。"); return null; }
+      if (!d.agreeNotes) { alert("注意事項を確認し、同意してください。"); return null; }
+
+      return d;
+    }
+
+    // confirm step
+    toConfirm.addEventListener("click", () => {
+      const d = validate();
+      if (!d) return;
+
+      const rows = [
+        ["姓", d.lastName],
+        ["名", d.firstName],
+        ["フリガナ（姓）", d.lastKana],
+        ["フリガナ（名）", d.firstKana],
+        ["E-mail", d.email],
+        ["TEL", d.tel],
+        ["性別", d.gender],
+        ["誕生日", d.birthday],
+        ["ワクチン接種", d.vaccine],
+        ["その他ご要望など", d.memo],
+        ["利用規約", "同意済み"],
+        ["注意事項", "確認済み"],
+      ];
+
+      summaryEl.innerHTML = rows.map(([k, v]) => `
+        <div class="sumRow">
+          <div class="sumKey">${escapeHtml(k)}</div>
+          <div class="sumVal">${escapeHtml(v)}</div>
+        </div>
+      `).join("");
+
+      inputView.style.display = "none";
+      confirmView.style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    backBtn.addEventListener("click", () => {
+      confirmView.style.display = "none";
+      inputView.style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // send
+    sendBtn.addEventListener("click", async () => {
+      const d = validate();
+      if (!d) return;
+
+      const text =
+        `≪連絡先入力≫
+【姓】${d.lastName}
+【名】${d.firstName}
+【フリガナ（姓）】${d.lastKana}
+【フリガナ（名）】${d.firstKana}
+【E-mail】${d.email}
+【TEL】${d.tel}
+【性別】${d.gender}
+【誕生日】${d.birthday}
+【ワクチン接種】${d.vaccine}
+【その他ご要望など】${d.memo}
+【利用規約】同意済み
+【注意事項】確認済み`;
+
+      try {
+        if (window.liff && liff.isInClient && liff.isInClient()) {
+          await liff.sendMessages([{ type: "text", text }]);
+          alert("ご記入ありがとうございます。");
+          liff.closeWindow();
+        } else {
+          alert("（ブラウザ確認）送信テキストをコンソールに出力しました。");
+          console.log(text);
+        }
+      } catch (e) {
+        console.error(e);
+        alert("送信に失敗しました。もう一度お試しください。");
+      }
+    });
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+
+</html>
