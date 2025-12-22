@@ -567,14 +567,13 @@
       </div>
 
       <div class="row">
-        <div class="label">あらゆるワクチン接種について<span class="req">*</span></div>
+        <div class="label">2週間前後のワクチン接種はありますか？<span class="req">*</span></div>
         <div class="control">
+          <p class="hint">※ワクチン接種前後、2週間はお手入れできません。</p>
           <select id="vaccine" required>
             <option value="">—</option>
-            <option>接種済み</option>
-            <option>未接種</option>
-            <option>該当なし</option>
-            <option>不明</option>
+            <option value="はい">はい</option>
+            <option value="いいえ">いいえ</option>
           </select>
         </div>
       </div>
@@ -978,7 +977,7 @@ Web予約申込における個人情報の取扱いについて(法定公表事�
         alert("TELは数字のみ（9〜12桁目安）で入力してください。"); tel.focus(); return null;
       }
 
-      if (!d.vaccine) { alert("あらゆるワクチン接種について選択してください。"); vaccine.focus(); return null; }
+      if (!d.vaccine) { alert("2週間前後のワクチン接種の有無を選択してください。"); vaccine.focus(); return null; }
 
       if (!d.agreeTerms) { alert("利用規約を確認し、同意してください。"); return null; }
       if (!d.agreeNotes) { alert("注意事項を確認し、同意してください。"); return null; }
@@ -1000,7 +999,7 @@ Web予約申込における個人情報の取扱いについて(法定公表事�
         ["TEL", d.tel],
         ["性別", d.gender],
         ["誕生日", d.birthday],
-        ["ワクチン接種", d.vaccine],
+        ["2週間前後のワクチン接種", d.vaccine],
         ["その他ご要望など", d.memo],
         ["利用規約", "同意済み"],
         ["注意事項", "確認済み"],
@@ -1039,7 +1038,7 @@ Web予約申込における個人情報の取扱いについて(法定公表事�
 【TEL】${d.tel}
 【性別】${d.gender}
 【誕生日】${d.birthday}
-【ワクチン接種】${d.vaccine}
+【2週間前後のワクチン接種】${d.vaccine}
 【その他ご要望など】${d.memo}
 【利用規約】同意済み
 【注意事項】確認済み`;
